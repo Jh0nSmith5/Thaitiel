@@ -7,6 +7,7 @@ import { BookCard } from './components/BookCard';
 import { AuthModal } from './components/AuthModal';
 import { CollectionsView } from './components/CollectionsView';
 import { CategoryCarousel } from './components/CategoryCarousel';
+import { BookReader } from './components/BookReader';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -21,7 +22,13 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [currentQuery, setCurrentQuery] = useState('');
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const booksPerPage = 20;
+
+  const handleBookSelect = (bookId: string) => {
+    setSelectedBookId(bookId);
+    setView('reader');
+  };
 
   useEffect(() => {
     if (!supabaseReady || !supabase) return;
@@ -59,10 +66,10 @@ function App() {
       if (!hasSearched) {
         setLoading(true);
         try {
-          const { items, totalItems } = await searchBooks('harry potter');
+          const { items, totalItems } = await searchBooks('*');
           setBooks(items);
           setTotalItems(totalItems);
-          setCurrentQuery('harry potter');
+          setCurrentQuery('*');
         } catch (error) {
           console.error('Error cargando libros populares:', error);
         } finally {
@@ -196,6 +203,7 @@ function App() {
                       key={book.id}
                       book={book}
                       onAddToList={(listName) => handleAddToList(book.id, listName)}
+                      onBookSelect={handleBookSelect}
                     />
                   ))}
                 </div>
@@ -233,12 +241,30 @@ function App() {
             onBackToSearch={() => setView('search')} 
           />
         )}
+        {view === 'reader' && selectedBookId && (
+          <BookReader 
+            bookId={selectedBookId}
+            onClose={() => {
+              setView('search');
+              setSelectedBookId(null);
+            }}
+          />
+        )}
       </main>
 
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
       />
+      {selectedBookId && (
+        <BookReader
+          bookId={selectedBookId}
+          onClose={() => {
+            setSelectedBookId(null);
+            setView('search');
+          }}
+        />
+      )}
     </div>
   );
 }

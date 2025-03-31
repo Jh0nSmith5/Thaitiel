@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
 import { supabase } from '../lib/supabase';
 import { Session } from '@supabase/supabase-js';
 
@@ -110,7 +111,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         console.error('Detalles del error:', err);
 
         if (err.message.includes('provider is not enabled')) {
-          errorMessage = 'El inicio de sesión con Google no está habilitado. Por favor, contacta al administrador.';
+          errorMessage = 'El inicio de sesión con Google no está habilitado. Por favor, habilítalo en la consola de Supabase (Authentication > Providers).';
         } else if (err.message.includes('Invalid login credentials')) {
           errorMessage = 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.';
         } else if (err.message.includes('Email not confirmed')) {
@@ -160,7 +161,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: 'https://epuysvtcqvqydlthhvsz.supabase.co/auth/v1/callback',
+          redirectTo: `${import.meta.env.VITE_SUPABASE_URL}/auth/v1/callback`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -308,17 +309,19 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               </div>
             </div>
 
-            <button
-              onClick={handleGoogleSignIn}
-              className="mt-4 w-full flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <img
-                src="https://www.google.com/favicon.ico"
-                alt="Google"
-                className="w-4 h-4"
-              />
-              Continue with Google
-            </button>
+            {supabase && (
+              <button
+                onClick={handleGoogleSignIn}
+                className="mt-4 w-full flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <img
+                  src="https://www.google.com/favicon.ico"
+                  alt="Google"
+                  className="w-4 h-4"
+                />
+                Continue with Google
+              </button>
+            )}
           </div>
 
           <p className="mt-4 text-center text-sm text-gray-600">

@@ -3,18 +3,9 @@ import { Book, BookmarkPlus, BookOpen, CheckCircle, ChevronDown } from 'lucide-r
 import { cn } from '../lib/utils';
 
 interface BookCardProps {
-  book: {
-    id: string;
-    volumeInfo: {
-      title: string;
-      authors?: string[];
-      imageLinks?: {
-        thumbnail: string;
-      };
-      description?: string;
-    };
-  };
-  onAddToList: (listName: string) => void;
+  book: GoogleBook;
+  onAddToList: (listName: string, book: GoogleBook) => void;
+  onBookSelect: (bookId: string) => void;
 }
 
 function DropdownMenu({ onAddToList }: { onAddToList: (listName: string) => void }) {
@@ -80,7 +71,7 @@ function DropdownMenu({ onAddToList }: { onAddToList: (listName: string) => void
   );
 }
 
-export function BookCard({ book, onAddToList }: BookCardProps) {
+export function BookCard({ book, onAddToList, onBookSelect }: BookCardProps) {
   if (!book?.volumeInfo) {
     console.error('Datos del libro inválidos:', book);
     return null;
@@ -89,12 +80,18 @@ export function BookCard({ book, onAddToList }: BookCardProps) {
   const { title = 'Título desconocido', authors = [], imageLinks, description = 'Sin descripción disponible' } = book.volumeInfo;
 
   return (
-    <div className="bg-gray-900 rounded-lg shadow-md overflow-visible">
+    <div 
+      className={cn(
+        "relative group cursor-pointer transition-transform hover:scale-[1.02]",
+        "bg-gray-900 rounded-xl p-4 h-full flex flex-col"
+      )}
+      onClick={() => onBookSelect(book.id)}
+    >
       <div className="aspect-[2/3] relative">
         <img
           src={imageLinks?.thumbnail || 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400'}
           alt={title}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover cursor-pointer"
           onError={(e) => {
             e.currentTarget.src = 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400';
           }}
